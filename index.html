@@ -154,7 +154,7 @@
         <div><label class="lbl" for="namesCarollo"><span class="unit">Carollo</span></label><input type="text" id="namesCarollo" placeholder="Names"></div>
       </div>
       <div class="row">
-        <div><label class="lbl" for="namesKantex"><span class="unit">Kantex</span></label><input type="text" id="namesKantex" placeholder="Names"></div>
+        <div><label class="lbl" for="namesKantex"><span class="unit">Kantex</span></label><input type="text" id="namesKantex" value="AJ, Carlos, Cody, Dylan, John Lowe" placeholder="Names"></div>
         <div><label class="lbl" for="namesICG"><span class="unit">ICG</span></label><input type="text" id="namesICG" value="Alex Alley"></div>
       </div>
     </div>
@@ -214,11 +214,11 @@
 
   <!-- Sections from the setup brief -->
   <section class="card" data-sec="loc">
-    <div class="sec-head"><h2>Station or location</h2></div>
+    <div class="sec-head"><h2>Test stations and locations worked</h2></div>
     <div class="sec-body">
       <div class="tbl" data-table="locations"></div>
       <button class="btn small tbl-add" type="button" data-add="locations">+ Add a location</button>
-      <div class="hint">For coordinates, open the Maps app, long press your spot, copy the coordinates and paste them into Latitude. Both numbers go in from one paste. GPS tries the phone's location first, but the phone may not share it with this page. List every station or stretch covered today.</div>
+      <div class="hint">One row per test station or spot worked today, with the pipe it is on. Tap GPS for the coordinates, or paste them from the Maps app into Latitude (both numbers go in from one paste).</div>
       <div class="slot" data-slot="loc" data-caption="Site overview"></div>
     </div>
   </section>
@@ -229,7 +229,7 @@
       <div class="row">
         <div class="field"><label class="lbl" for="pipeSize">Size <span class="unit">inches</span></label><input type="number" id="pipeSize" inputmode="decimal" step="any" placeholder="24"></div>
         <div class="field"><label class="lbl" for="pipeMaterial">Material</label>
-          <select id="pipeMaterial"><option>Ductile iron</option><option>Steel</option><option>Cast iron</option><option>Concrete cylinder</option><option>PVC (fittings only)</option><option>Other</option></select></div>
+          <select id="pipeMaterial"><option>Ductile iron</option><option>Steel</option><option>Mortar-coated steel</option><option>Cast iron</option><option>Concrete cylinder</option><option>PVC (fittings only)</option><option>Other</option></select></div>
       </div>
       <div class="field"><label class="lbl" for="pipeCoating">Coating</label>
         <select id="pipeCoating"><option>Polyethylene encasement</option><option>Fusion bonded epoxy</option><option>Tape wrap</option><option>Coal tar</option><option>Mortar</option><option>Bare</option><option>Other</option></select></div>
@@ -253,7 +253,7 @@
       <div class="row">
         <div class="field"><label class="lbl" for="anodeCount">Count installed today</label><input type="number" id="anodeCount" inputmode="numeric" min="0" placeholder="6"></div>
         <div class="field"><label class="lbl" for="anodeBackfill">Backfill</label>
-          <select id="anodeBackfill"><option>Prepackaged backfill</option><option>Loose backfill, mixed on site</option><option>Native soil</option><option>None</option></select></div>
+          <select id="anodeBackfill"><option>Prepackaged backfill</option><option>Prepackaged, hole backfilled with approved loam</option><option>Prepackaged, hole backfilled with loam and structural sand</option><option>Loose backfill, mixed on site</option><option>Native soil</option><option>None</option></select></div>
       </div>
       <div class="field"><span class="lbl">Installed as</span>
         <div class="seg" data-seg="anodeInstall"><button type="button" data-val="Vertical holes" aria-pressed="true">Vertical holes</button><button type="button" data-val="Horizontal" aria-pressed="false">Horizontal</button><button type="button" data-val="In the pipe trench" aria-pressed="false">In the trench</button></div>
@@ -319,7 +319,7 @@
       </div>
       <div class="row">
         <div class="field"><label class="lbl" for="tsCount">Test stations installed today</label><input type="number" id="tsCount" inputmode="numeric" min="0" placeholder="1"></div>
-        <div class="field"><label class="lbl" for="tsId">Test station name or station</label><textarea id="tsId" rows="1" class="grow" placeholder="Example: TS-3 at Sta 13+20"></textarea></div>
+        <div class="field"><label class="lbl" for="tsId">Which test stations (names)</label><textarea id="tsId" rows="1" class="grow" placeholder="Example: TS 22 and TS 23"></textarea></div>
       </div>
       <div class="field"><span class="lbl">Terminal board wiring</span>
         <div class="tbl" data-table="terminals"></div>
@@ -380,12 +380,12 @@
     </div>
     <div class="sec-body">
       <div class="field"><span class="lbl">Type</span>
-        <div class="seg" data-seg="weldType"><button type="button" data-val="Thermite" aria-pressed="true">Thermite</button><button type="button" data-val="Pin brazed" aria-pressed="false">Pin brazed</button><button type="button" data-val="Thermite and pin brazed" aria-pressed="false">Both</button></div>
+        <div class="seg" data-seg="weldType"><button type="button" data-val="Thermite" aria-pressed="true">Thermite (cadweld)</button><button type="button" data-val="Keyhole thermite" aria-pressed="false">Keyhole cadweld</button><button type="button" data-val="Pin brazed" aria-pressed="false">Pin brazed</button><button type="button" data-val="Thermite and pin brazed" aria-pressed="false">Both</button></div>
       </div>
       <div class="row">
         <div class="field"><label class="lbl" for="weldCount">Welds made today</label><input type="number" id="weldCount" inputmode="numeric" min="0" placeholder="8"></div>
         <div class="field"><label class="lbl" for="weldMat">Coating repair material</label>
-          <select id="weldMat"><option>Weld cap with mastic</option><option>Two-part epoxy</option><option>Wax tape</option><option>Cold applied tape</option><option>Other</option></select></div>
+          <select id="weldMat"><option>Weld cap with mastic</option><option>Two-part epoxy</option><option>Epoxy and mortar</option><option>Mortar</option><option>Wax tape</option><option>Cold applied tape</option><option>Other</option></select></div>
       </div>
       <div class="field"><span class="lbl">Coating repair at each weld</span>
         <div class="seg" data-seg="weldRepair"><button type="button" data-val="all" data-tone="good" aria-pressed="true">All welds repaired</button><button type="button" data-val="some" data-tone="warn" aria-pressed="false">Some not repaired</button><button type="button" data-val="none" data-tone="warn" aria-pressed="false">Not repaired yet</button></div>
@@ -431,7 +431,7 @@
       <div class="row">
         <div class="field"><label class="lbl" for="connCount">Connections repaired</label><input type="number" id="connCount" inputmode="numeric" min="0" placeholder="8"></div>
         <div class="field"><label class="lbl" for="connMat">Material</label>
-          <select id="connMat"><option>Two-part epoxy</option><option>Wax tape</option><option>Cold applied tape</option><option>Heat shrink</option><option>Polyethylene encasement patch</option><option>Other</option></select></div>
+          <select id="connMat"><option>Two-part epoxy</option><option>Epoxy and mortar</option><option>Mortar</option><option>Wax tape</option><option>Cold applied tape</option><option>Heat shrink</option><option>Polyethylene encasement patch</option><option>Other</option></select></div>
       </div>
       <div class="field"><label class="lbl" for="connNote">Note (optional)</label><textarea id="connNote" rows="1" class="grow" placeholder="Example: Encasement re-taped at each lead wire."></textarea></div>
       <div class="slot" data-slot="conn" data-caption="Coating repair at connection"></div>
@@ -681,7 +681,8 @@
       { k: 'cond', label: 'Conditions', type: 'select', wide: 1, opts: ['Clear', 'Partly cloudy', 'Overcast', 'Windy', 'Rain', 'Snow', 'Fog', 'Hot', 'Cold'] },
       { k: 'temp', label: 'Temp \u00b0F', type: 'num', ph: '55' }] },
     locations: { cols: [
-      { k: 'station', label: 'Station or location', type: 'text', wide: 1, ph: 'Sta 12+00 to 14+50' },
+      { k: 'station', label: 'Test station or location', type: 'text', wide: 1, ph: 'TS 22' },
+      { k: 'pipe', label: 'Pipe', type: 'select', opts: ['', '54" PI', '48" ML', '42" PI', '30" RAS', '8" SCUM', 'Other'] },
       { k: 'lat', label: 'Latitude', type: 'num', ph: '40.6041' },
       { k: 'lng', label: 'Longitude', type: 'num', ph: '-111.9218' }], gps: true },
     anodeHoles: { cols: [
@@ -709,7 +710,7 @@
     excav: { cols: [
       { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'Sta 12+00 to 12+60' },
       { k: 'depth', label: 'Depth ft', type: 'num', ph: '6.5' },
-      { k: 'backfill', label: 'Backfill', type: 'select', opts: ['Native soil', 'Sand bedding', 'Road base', 'Flowable fill', 'Slurry', 'Other'] }] }
+      { k: 'backfill', label: 'Backfill', type: 'select', opts: ['Approved loam', 'Structural sand', 'Native soil', 'Sand bedding', 'Road base', 'Flowable fill', 'Slurry', 'Other'] }] }
   };
 
   const seg = {};
@@ -861,7 +862,7 @@
     const eq = equipList(); if (eq.length) out.push('Inspection equipment used: ' + joinNames(eq) + '.');
 
     const locs = rowsFilled('locations');
-    if (locs.length) out.push('Work today covered ' + joinNames(locs.map(r => r.station + (r.lat && r.lng ? ' (' + r.lat + ', ' + r.lng + ')' : ''))) + '.');
+    if (locs.length) out.push('Work today covered ' + joinNames(locs.map(r => r.station + (r.pipe ? ' on the ' + r.pipe : '') + (r.lat && r.lng ? ' (' + r.lat + ', ' + r.lng + ')' : ''))) + '.');
     const ps = num($('pipeSize').value);
     out.push('The pipe is ' + (ps ? ps + '-inch ' : '') + $('pipeMaterial').value.toLowerCase() + ' with ' + $('pipeCoating').value.toLowerCase() + ($('pipeNote').value.trim() ? '. ' + sentence($('pipeNote').value) : '.'));
 
@@ -1119,7 +1120,7 @@
   }
   function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(snapshot())); } catch (e) {} }
   function saveSettings() { try { const o = {}; SETTING_IDS.forEach(id => o[id] = $(id).value); localStorage.setItem(SETTINGS_KEY, JSON.stringify(o)); } catch (e) {} }
-  function loadSettings() { try { const o = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); if (o) SETTING_IDS.forEach(id => { if (o[id] != null) $(id).value = o[id]; }); } catch (e) {} }
+  function loadSettings() { try { const o = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); if (o) SETTING_IDS.forEach(id => { if (o[id] != null && !(id.indexOf('names') === 0 && !String(o[id]).trim())) $(id).value = o[id]; }); } catch (e) {} }
 
   // ---------- narrative editing ----------
   function syncNarrUI() {
@@ -1270,7 +1271,7 @@
     return {
       Date: $('date').value, Site: $('site').value.trim(), ReportFile: fileBase() + '.docx', Inspector: $('inspector').value.trim(), Installer: $('installer').value.trim(),
       WorkSummary: $('workSummary').value.trim(),
-      Stations: locs.map(r => r.station).join('; '), GPS: locs.map(r => (r.lat && r.lng ? r.lat + ', ' + r.lng : '')).filter(Boolean).join('; '),
+      Stations: locs.map(r => r.station + (r.pipe ? ' (' + r.pipe + ')' : '')).join('; '), GPS: locs.map(r => (r.lat && r.lng ? r.lat + ', ' + r.lng : '')).filter(Boolean).join('; '),
       Weather: (tables.weather || []).map(r => r.when + (r.time ? ' ' + r.time : '') + ': ' + r.cond + (num(r.temp) ? ', ' + num(r.temp) + ' F' : '')).join('; '),
       TempStartF: num(((tables.weather || [])[0] || {}).temp), TempHighF: (function () { const t = (tables.weather || []).map(r => num(r.temp)).filter(Boolean).map(Number); return t.length ? String(Math.max(...t)) : ''; })(),
       SiteNote: $('weatherNote').value.trim(), HoursOnSite: $('workHours').value.trim(),
@@ -1314,7 +1315,7 @@
     if (d.DropIns) pp.push(['Stopped by', d.DropIns]);
     B.push({ kind: 'kv', title: 'People on site', pairs: pp });
     const locs = rowsFilled('locations');
-    if (locs.length) B.push({ kind: 'list', title: 'Station or location', headers: ['Station or location', 'Latitude', 'Longitude'], widths: [7950, 3000, 3000], rows: locs.map(r => [r.station, r.lat, r.lng]) });
+    if (locs.length) B.push({ kind: 'list', title: 'Test stations and locations worked', headers: ['Test station or location', 'Pipe', 'Latitude', 'Longitude'], widths: [5950, 2500, 2750, 2750], rows: locs.map(r => [r.station, r.pipe, r.lat, r.lng]) });
     const pipe = [['Pipe size', d.PipeSize ? d.PipeSize + ' in' : ''], ['Material', d.PipeMaterial], ['Coating', d.PipeCoating], ['Note', d.PipeNote]];
     B.push({ kind: 'kv', title: 'Pipe', pairs: pipe });
     if (secOn('anodes')) {
