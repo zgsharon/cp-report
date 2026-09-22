@@ -182,17 +182,14 @@
 
   <section class="card">
     <h2>Weather</h2>
-    <div class="field"><label class="lbl" for="weather">Conditions</label>
-      <input type="text" id="weather" placeholder="Tap one below or type" autocapitalize="none">
-      <div class="chips" id="weatherChips" style="margin-top:6px">
-        <button type="button">clear</button><button type="button">partly cloudy</button><button type="button">overcast</button><button type="button">windy</button><button type="button">rain</button><button type="button">snow</button><button type="button">hot</button><button type="button">cold</button><button type="button">wet ground</button><button type="button">dry ground</button>
-      </div>
-    </div>
+    <div class="tbl" data-table="weather"></div>
+    <button class="btn small tbl-add" type="button" data-add="weather">+ Add a reading (midday, end of day)</button>
+    <div class="hint">Start of day is always there. Add midday or end of day when conditions change.</div>
     <div class="row">
-      <div class="field"><label class="lbl" for="tempF">Air temp <span class="unit">°F</span></label><input type="number" id="tempF" inputmode="decimal" step="1" placeholder="68"></div>
       <div class="field"><label class="lbl" for="workHours">Hours on site</label><input type="text" id="workHours" placeholder="Example: 7:00 AM to 3:30 PM"></div>
+      <div class="field"><label class="lbl" for="weatherNote">Ground or site note</label><input type="text" id="weatherNote" placeholder="Example: wet ground, trench holding water"></div>
     </div>
-    <div class="slot" data-slot="weather" data-caption="Site conditions"></div>
+    <div class="slot" data-slot="weather" data-caption="Weather"></div>
   </section>
 
   <section class="card">
@@ -672,12 +669,17 @@
 <script>
 (function () {
   const $ = id => document.getElementById(id);
-  const CAPTIONS = ['Site overview', 'Site conditions', 'Pipe and coating', 'Anode installation', 'Anode hole depth', 'Anode lead wire', 'Header cable and conduit', 'Splice', 'Test station and terminal board', 'Native potential reading', 'Potential reading after connection', 'Weld and coating repair', 'Isolation check', 'Excavation and backfill', 'Coating repair at connection', 'Deficiency', 'Other'];
+  const CAPTIONS = ['Site overview', 'Weather', 'Pipe and coating', 'Anode installation', 'Anode hole depth', 'Anode lead wire', 'Header cable and conduit', 'Splice', 'Test station and terminal board', 'Native potential reading', 'Potential reading after connection', 'Weld and coating repair', 'Isolation check', 'Excavation and backfill', 'Coating repair at connection', 'Deficiency', 'Other'];
   const SLOT_ORDER = ['weather', 'loc', 'pipe', 'anodes', 'lead', 'header', 'ts', 'native', 'pots', 'welds', 'iso', 'excav', 'conn', 'other'];
   const COMPANIES = ['SVWRF', 'Carollo', 'Kantex', 'ICG'];
   const DRAFT_KEY = 'cpReportDraft', LOG_KEY = 'cpReportLog', SETTINGS_KEY = 'cpReportSettings';
   const AWG = ['#14', '#12', '#10', '#8', '#6', '#4', '#2'];
   const TABLES = {
+    weather: { cols: [
+      { k: 'when', label: 'Time of day', type: 'select', opts: ['Start of day', 'Midday', 'End of day', 'Other'] },
+      { k: 'time', label: 'Time', type: 'text', ph: '7:00 AM' },
+      { k: 'cond', label: 'Conditions', type: 'select', wide: 1, opts: ['Clear', 'Partly cloudy', 'Overcast', 'Windy', 'Rain', 'Snow', 'Fog', 'Hot', 'Cold'] },
+      { k: 'temp', label: 'Temp \u00b0F', type: 'num', ph: '55' }] },
     locations: { cols: [
       { k: 'station', label: 'Station or location', type: 'text', wide: 1, ph: 'Sta 12+00 to 14+50' },
       { k: 'lat', label: 'Latitude', type: 'num', ph: '40.6041' },
@@ -754,7 +756,9 @@
     document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => { addRow(b.dataset.add); renderTable(b.dataset.add); const last = document.querySelector('[data-table="' + b.dataset.add + '"] .trow:last-child input, [data-table="' + b.dataset.add + '"] .trow:last-child select'); if (last) last.focus(); onChange(); }));
   }
   function blankRow(key) { const r = {}; TABLES[key].cols.forEach(c => { r[c.k] = c.type === 'select' ? c.opts[0] : ''; }); return r; }
-  function addRow(key, vals) { const r = blankRow(key); if (vals) Object.assign(r, vals); tables[key].push(r); return r; }
+  function addRow(key, vals) { const r = blankRow(key); if (vals) Object.assign(r, vals);
+    if (key === 'weather' && !vals) { const used = tables.weather.map(x => x.when); r.when = ['Start of day', 'Midday', 'End of day', 'Other'].find(w => !used.includes(w)) || 'Other'; }
+    tables[key].push(r); return r; }
   function renderTable(key) {
     const host = document.querySelector('[data-table="' + key + '"]'); if (!host) return;
     host.innerHTML = '';
@@ -799,7 +803,7 @@
     });
   }
   function renderAllTables() { Object.keys(TABLES).forEach(renderTable); }
-  function rowsFilled(key) { return tables[key].filter(r => TABLES[key].cols.some(c => c.type !== 'select' && String(r[c.k]).trim() !== '')); }
+  function rowsFilled(key) { if (key === 'weather') return tables[key].slice(); return tables[key].filter(r => TABLES[key].cols.some(c => c.type !== 'select' && String(r[c.k]).trim() !== '')); }
 
   // ---------- people ----------
   function usualNames(co) { return splitList($('names' + co).value); }
@@ -839,8 +843,10 @@
     out.push(me + ' was on site ' + (fmtDateLong($('date').value) || '____') + ' to inspect ' + inst + "'s cathodic protection installation at " + site + '.');
     const ws = $('workSummary').value.trim(); if (ws) out.push(sentence(ws));
 
-    const w = $('weather').value.trim(), t = num($('tempF').value), hrs = $('workHours').value.trim();
-    if (w || t || hrs) out.push('Weather was ' + (w || 'not recorded') + (t ? ', ' + t + ' degrees F' : '') + (hrs ? '. Hours on site: ' + hrs : '') + '.');
+    const wx = tables.weather || [], hrs = $('workHours').value.trim(), wn = $('weatherNote').value.trim();
+    if (wx.length) out.push('Weather: ' + wx.map(r => r.when.toLowerCase() + (r.time ? ' (' + r.time + ')' : '') + ' ' + r.cond.toLowerCase() + (num(r.temp) ? ', ' + num(r.temp) + ' degrees F' : '')).join(', ') + '.');
+    if (wn) out.push(sentence(wn));
+    if (hrs) out.push('Hours on site: ' + hrs + '.');
 
     const parts = [];
     COMPANIES.forEach(co => { const p = peopleFor(co); if (p.length) parts.push(joinNames(p) + ' (' + co + ')'); });
@@ -1046,7 +1052,7 @@
     t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3500);
   }
 
-  const TEXT_IDS = ['date', 'site', 'workSummary', 'weather', 'tempF', 'workHours', 'dropIns', 'equipOther', 'pipeSize', 'pipeMaterial', 'pipeCoating', 'pipeNote', 'anodeWeightOther', 'anodeCount', 'anodeBackfill', 'leadSize', 'leadIns', 'leadLength', 'headerSize', 'headerIns', 'headerLength', 'splices', 'spliceType', 'conduitType', 'conduitSize', 'tsCount', 'tsId', 'tsWiringNote', 'refNote', 'currentA', 'resistOhm', 'weldCount', 'weldMat', 'weldNote', 'connCount', 'connMat', 'connNote', 'notes', 'signoffNote'];
+  const TEXT_IDS = ['date', 'site', 'workSummary', 'workHours', 'weatherNote', 'dropIns', 'equipOther', 'pipeSize', 'pipeMaterial', 'pipeCoating', 'pipeNote', 'anodeWeightOther', 'anodeCount', 'anodeBackfill', 'leadSize', 'leadIns', 'leadLength', 'headerSize', 'headerIns', 'headerLength', 'splices', 'spliceType', 'conduitType', 'conduitSize', 'tsCount', 'tsId', 'tsWiringNote', 'refNote', 'currentA', 'resistOhm', 'weldCount', 'weldMat', 'weldNote', 'connCount', 'connMat', 'connNote', 'notes', 'signoffNote'];
   const SETTING_IDS = ['client', 'project', 'installer', 'docTitle', 'inspector', 'namesSVWRF', 'namesCarollo', 'namesKantex', 'namesICG'];
   function snapshot() {
     const s = { seg: Object.assign({}, seg), text: {}, tables: JSON.parse(JSON.stringify(tables)), people: JSON.parse(JSON.stringify(people)), equip: Array.from(document.querySelectorAll('#equipChips button[aria-pressed="true"]')).map(b => b.textContent), narrEdited, narr: narrEdited ? $('narrEdit').value : '' };
@@ -1062,6 +1068,7 @@
     setEquip(s.equip || []);
     narrEdited = !!s.narrEdited;
     if (narrEdited) $('narrEdit').value = s.narr || '';
+    if (!tables.weather.length) addRow('weather');
     renderAllTables(); renderCompanies(); syncNarrUI();
   }
   function saveDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(snapshot())); } catch (e) {} }
@@ -1158,7 +1165,7 @@
       const use = document.createElement('button'); use.type = 'button'; use.className = 'btn small'; use.textContent = 'Reuse answers';
       use.addEventListener('click', () => {
         restore(r.snapshot, false); photos = []; renderPhotos();
-        $('date').value = todayIso(); ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote'].forEach(k => { $(k).value = ''; });
+        $('date').value = todayIso(); tables.weather = []; addRow('weather'); renderTable('weather'); ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote'].forEach(k => { $(k).value = ''; });
         setSeg('signoff', 'per'); narrEdited = false; syncNarrUI();
         onChange(); window.scrollTo({ top: 0 }); $('site').focus(); toast("Answers copied for today. Check the site, update the numbers and add photos.");
       });
@@ -1218,7 +1225,9 @@
       Date: $('date').value, Site: $('site').value.trim(), ReportFile: fileBase() + '.docx', Inspector: $('inspector').value.trim(), Installer: $('installer').value.trim(),
       WorkSummary: $('workSummary').value.trim(),
       Stations: locs.map(r => r.station).join('; '), GPS: locs.map(r => (r.lat && r.lng ? r.lat + ', ' + r.lng : '')).filter(Boolean).join('; '),
-      Weather: $('weather').value.trim(), TempF: num($('tempF').value), HoursOnSite: $('workHours').value.trim(),
+      Weather: (tables.weather || []).map(r => r.when + (r.time ? ' ' + r.time : '') + ': ' + r.cond + (num(r.temp) ? ', ' + num(r.temp) + ' F' : '')).join('; '),
+      TempStartF: num(((tables.weather || [])[0] || {}).temp), TempHighF: (function () { const t = (tables.weather || []).map(r => num(r.temp)).filter(Boolean).map(Number); return t.length ? String(Math.max(...t)) : ''; })(),
+      SiteNote: $('weatherNote').value.trim(), HoursOnSite: $('workHours').value.trim(),
       PeopleSVWRF: peopleFor('SVWRF').join(', '), PeopleCarollo: peopleFor('Carollo').join(', '), PeopleKantex: peopleFor('Kantex').join(', '), PeopleICG: peopleFor('ICG').join(', '), DropIns: $('dropIns').value.trim(),
       Equipment: equipList().join(', '),
       PipeSize: num($('pipeSize').value), PipeMaterial: $('pipeMaterial').value, PipeCoating: $('pipeCoating').value, PipeNote: $('pipeNote').value.trim(),
@@ -1252,7 +1261,9 @@
   }
   function buildBlocks(d) {
     const B = [];
-    B.push({ kind: 'kv', title: 'Report', pairs: [['Date', fmtDate(d.Date)], ['Site', d.Site], ['Inspector', d.Inspector + ' (ICG)'], ['Installer', d.Installer], ['Weather', d.Weather + (d.TempF ? ', ' + d.TempF + ' °F' : '')], ['Hours on site', d.HoursOnSite], ['Stations covered', d.Stations], ['Equipment used', d.Equipment]] });
+    B.push({ kind: 'kv', title: 'Report', pairs: [['Date', fmtDate(d.Date)], ['Site', d.Site], ['Inspector', d.Inspector + ' (ICG)'], ['Installer', d.Installer], ['Hours on site', d.HoursOnSite], ['Site note', d.SiteNote], ['Stations covered', d.Stations], ['Equipment used', d.Equipment]] });
+    const wx = tables.weather || [];
+    if (wx.length) B.push({ kind: 'list', title: 'Weather', headers: ['Time of day', 'Time', 'Conditions', 'Temp (\u00b0F)'], widths: [3000, 2500, 5950, 2500], rows: wx.map(r => [r.when, r.time, r.cond, num(r.temp)]) });
     const pp = [['SVWRF', d.PeopleSVWRF], ['Carollo', d.PeopleCarollo], ['Kantex', d.PeopleKantex], ['ICG', d.PeopleICG]];
     if (d.DropIns) pp.push(['Stopped by', d.DropIns]);
     B.push({ kind: 'kv', title: 'People on site', pairs: pp });
@@ -1338,19 +1349,12 @@
     let hadDraft = false;
     try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d) { restore(d, true); hadDraft = true; } } catch (e) {}
     if (!hadDraft) {
-      addRow('locations'); addRow('anodeHoles'); addRow('terminals', { term: '1', wire: 'Pipe lead', size: '#8' }); addRow('terminals', { term: '2', wire: 'Anode header', size: '#8' }); addRow('native'); addRow('pots'); addRow('isolation'); addRow('excav');
+      addRow('weather'); addRow('locations'); addRow('anodeHoles'); addRow('terminals', { term: '1', wire: 'Pipe lead', size: '#8' }); addRow('terminals', { term: '2', wire: 'Anode header', size: '#8' }); addRow('native'); addRow('pots'); addRow('isolation'); addRow('excav');
       renderAllTables(); renderCompanies();
     }
     if (!$('date').value) $('date').value = todayIso();
     TEXT_IDS.forEach(id => { $(id).addEventListener('input', onChange); $(id).addEventListener('change', onChange); });
     document.querySelectorAll('textarea').forEach(t => t.addEventListener('input', () => grow(t)));
-    document.querySelectorAll('#weatherChips button').forEach(b => b.addEventListener('click', () => {
-      const w = b.textContent;
-      const parts = $('weather').value.split(',').map(x => x.trim()).filter(Boolean);
-      if (parts.includes(w)) parts.splice(parts.indexOf(w), 1); else parts.push(w);
-      $('weather').value = parts.join(', ');
-      onChange();
-    }));
     document.querySelectorAll('#equipChips button').forEach(b => { if (!b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); onChange(); }); });
     SETTING_IDS.forEach(id => $(id).addEventListener('input', () => { saveSettings(); if (id.indexOf('names') === 0) renderCompanies(); onChange(); }));
     renderLog(); renderPhotos(); syncNarrUI(); onChange(); growAll(); setTimeout(growAll, 300);
