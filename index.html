@@ -137,7 +137,7 @@
   <section class="card" id="recentCard" hidden>
     <h2>Reports made on this phone</h2>
     <div class="recent" id="recentList"></div>
-    <div class="hint" style="margin-top:8px">Each report is saved as a Word file when you tap Make report. This list is only a record of what was made here. Reuse answers copies yesterday's answers into a new report for today.</div>
+    <div class="hint" style="margin-top:8px">Each report is saved as a Word file when you tap Make report. This list is only a record of what was made here. Reuse answers copies yesterday's answers into a new report for today and clears what is on the page now, so it asks for a second tap.</div>
     <div class="row" style="margin-top:8px"><button class="btn small" id="exportLog" type="button">Save log as CSV</button><button class="btn small" id="clearLog" type="button">Clear list</button></div>
   </section>
 
@@ -1083,6 +1083,14 @@
   function setStatus(t) { $('barStatus').textContent = t; }
   function grow(el) { if (el.hidden || el.offsetParent === null) return; el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; }
   function growAll() { document.querySelectorAll('textarea').forEach(grow); }
+  // Two-tap confirmation for buttons that throw work away.
+  function armed(btn, label, fn) {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.armed === '1') { clearTimeout(btn._t); btn.dataset.armed = ''; btn.textContent = label; fn(); return; }
+      btn.dataset.armed = '1'; btn.textContent = 'Tap again to confirm';
+      btn._t = setTimeout(() => { btn.dataset.armed = ''; btn.textContent = label; }, 5000);
+    });
+  }
   let toastT;
   function toast(msg) {
     let t = document.querySelector('.toast');
@@ -1201,7 +1209,7 @@
       const sp = document.createElement('span'); sp.className = 'sp';
       const pill = document.createElement('span'); pill.className = 'pill ' + (r.flag ? 'warn' : 'good'); pill.textContent = r.signoff || (r.flag ? 'Items noted' : 'Per drawings');
       const use = document.createElement('button'); use.type = 'button'; use.className = 'btn small'; use.textContent = 'Reuse answers';
-      use.addEventListener('click', () => {
+      armed(use, 'Reuse answers', () => {
         restore(r.snapshot, false); photos = []; renderPhotos();
         $('date').value = todayIso(); tables.weather = []; addRow('weather'); renderTable('weather'); ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote'].forEach(k => { $(k).value = ''; });
         setSeg('signoff', 'per'); narrEdited = false; syncNarrUI();
@@ -1210,7 +1218,7 @@
       d.append(id, dt, sp, pill, use); list.appendChild(d);
     });
   }
-  $('clearLog').addEventListener('click', () => { writeLog([]); renderLog(); });
+  armed($('clearLog'), 'Clear list', () => { writeLog([]); renderLog(); });
   $('exportLog').addEventListener('click', async () => {
     const log = readLog();
     if (!log.length) { toast('Nothing in the list yet.'); return; }
