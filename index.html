@@ -134,10 +134,16 @@
     <div class="sub" id="countLine"></div>
   </header>
 
+  <section class="card" id="newDayCard" hidden style="border-color:var(--warn);background:var(--warn-soft)">
+    <h2 style="color:var(--warn)">This is still the report from <span id="newDayDate"></span></h2>
+    <div class="hint" style="margin-bottom:10px;color:var(--ink)">Start today's report to clear yesterday's counts, readings, notes and photos. The site, pipe, wire sizes, materials and people buttons carry over.</div>
+    <div class="row"><button class="btn primary" id="newDayStart" type="button">Start today's report</button><button class="btn" id="newDayKeep" type="button">Keep editing that one</button></div>
+  </section>
+
   <section class="card" id="recentCard" hidden>
     <h2>Reports made on this phone</h2>
     <div class="recent" id="recentList"></div>
-    <div class="hint" style="margin-top:8px">Each report is saved as a Word file when you tap Make report. This list is only a record of what was made here. Reuse answers copies yesterday's answers into a new report for today and clears what is on the page now, so it asks for a second tap.</div>
+    <div class="hint" style="margin-top:8px">Each report is saved as a Word file when you tap Make report. This list is only a record of what was made here. The page keeps one day's report until you start the next. When you open it on a new day it offers to start today's report. Reuse answers does the same from an older report, so it asks for a second tap.</div>
     <div class="row" style="margin-top:8px"><button class="btn small" id="exportLog" type="button">Save log as CSV</button><button class="btn small" id="clearLog" type="button">Clear list</button></div>
   </section>
 
@@ -1224,12 +1230,7 @@
       const sp = document.createElement('span'); sp.className = 'sp';
       const pill = document.createElement('span'); pill.className = 'pill ' + (r.flag ? 'warn' : 'good'); pill.textContent = r.signoff || (r.flag ? 'Items noted' : 'Per drawings');
       const use = document.createElement('button'); use.type = 'button'; use.className = 'btn small'; use.textContent = 'Reuse answers';
-      armed(use, 'Reuse answers', () => {
-        restore(r.snapshot, false); photos = []; renderPhotos();
-        $('date').value = todayIso(); tables.weather = []; addRow('weather'); renderTable('weather'); ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote'].forEach(k => { $(k).value = ''; });
-        setSeg('signoff', 'per'); narrEdited = false; syncNarrUI();
-        onChange(); window.scrollTo({ top: 0 }); $('site').focus(); toast("Answers copied for today. Check the site, update the numbers and add photos.");
-      });
+      armed(use, 'Reuse answers', () => { restore(r.snapshot, false); startNewDay(); });
       d.append(id, dt, sp, pill, use); list.appendChild(d);
     });
   }
@@ -1403,6 +1404,27 @@
     finally { $('makeBtn').disabled = false; updateBar(); }
   });
 
+  // ---------- new day ----------
+  // Keeps the setup (site, pipe, wire sizes, materials, people buttons). Clears everything that belongs to one day's work.
+  function startNewDay() {
+    photos = []; renderPhotos(); savePhotos();
+    $('date').value = todayIso();
+    tables.weather = []; addRow('weather');
+    ['anodeHoles', 'native', 'pots', 'isolation', 'excav'].forEach(k => { tables[k] = []; addRow(k); });
+    ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote', 'connNote', 'anodeCount', 'tsCount', 'tsId', 'currentA', 'resistOhm', 'weldCount', 'connCount', 'splices', 'headerLength', 'workHours', 'weatherNote'].forEach(k => { $(k).value = ''; });
+    ['weldRepair', 'connRepair'].forEach(k => setSeg(k, 'all')); setSeg('tsWiring', 'match'); setSeg('backfilled', 'no'); setSeg('signoff', 'per'); setSeg('sec_pots', 'no'); setSeg('sec_iso', 'no');
+    narrEdited = false; syncNarrUI(); renderAllTables();
+    $('newDayCard').hidden = true;
+    onChange(); window.scrollTo({ top: 0 }); toast("Fresh report for today. Yesterday's setup is kept. Check the site and add today's numbers and photos.");
+  }
+  function checkNewDay() {
+    const d = $('date').value, t = todayIso();
+    if (d && d < t) { $('newDayDate').textContent = fmtDate(d); $('newDayCard').hidden = false; }
+    else $('newDayCard').hidden = true;
+  }
+  $('newDayStart').addEventListener('click', startNewDay);
+  $('newDayKeep').addEventListener('click', () => { $('newDayCard').hidden = true; });
+
   // ---------- boot ----------
   function todayIso() { const t = new Date(); const pad = n => String(n).padStart(2, '0'); return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate()); }
   function start() {
@@ -1420,6 +1442,7 @@
     document.querySelectorAll('#equipChips button').forEach(b => { if (!b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); onChange(); }); });
     SETTING_IDS.forEach(id => $(id).addEventListener('input', () => { saveSettings(); if (id.indexOf('names') === 0) renderCompanies(); onChange(); }));
     renderLog(); renderPhotos(); syncNarrUI(); onChange(); growAll(); setTimeout(growAll, 300);
+    checkNewDay(); $('date').addEventListener('change', checkNewDay);
     loadPhotos().then(() => { if (photos.length) { renderPhotos(); } });
     if (window.claude && typeof window.claude.use === 'function') {
       window.claude.use('downloads').then(ns => { downloadsNs = ns; }).catch(() => {});
