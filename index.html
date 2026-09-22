@@ -964,9 +964,11 @@
     clearTimeout(photoSaveT);
     photoSaveT = setTimeout(async () => {
       try {
+        const items = [];
+        for (const p of photos) { if (!p.buf) p.buf = await p.blob.arrayBuffer(); items.push({ buf: p.buf, thumb: p.thumb, caption: p.caption, custom: p.custom, slot: p.slot }); }
         const db = await pdbOpen();
         const tx = db.transaction(PDB_STORE, 'readwrite');
-        tx.objectStore(PDB_STORE).put(photos.map(p => ({ blob: p.blob, thumb: p.thumb, caption: p.caption, custom: p.custom, slot: p.slot })), 'draft');
+        tx.objectStore(PDB_STORE).put(items, 'draft');
         tx.oncomplete = () => db.close();
       } catch (e) {}
     }, 400);
@@ -976,7 +978,19 @@
       const db = await pdbOpen();
       const list = await new Promise((res, rej) => { const rq = db.transaction(PDB_STORE).objectStore(PDB_STORE).get('draft'); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => rej(rq.error); });
       db.close();
-      if (Array.isArray(list) && list.length) photos = list.filter(p => p && p.blob && p.slot);
+      if (!Array.isArray(list) || !list.length) return;
+      const out = []; let lost = 0;
+      for (const p of list) {
+        if (!p || !p.slot) continue;
+        try {
+          let buf = p.buf;
+          if (!buf && p.blob) buf = await p.blob.arrayBuffer();
+          if (!buf || !buf.byteLength) { lost++; continue; }
+          out.push({ blob: new Blob([buf], { type: 'image/jpeg' }), buf, thumb: p.thumb, caption: p.caption, custom: p.custom || '', slot: p.slot });
+        } catch (e) { lost++; }
+      }
+      photos = out;
+      if (lost) setTimeout(() => toast(lost + ' saved photo' + (lost > 1 ? 's' : '') + ' could not be restored. Add ' + (lost > 1 ? 'them' : 'it') + ' again.'), 800);
     } catch (e) {}
   }
 
@@ -996,7 +1010,7 @@
       const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.84));
       const t = document.createElement('canvas'); t.width = 400; t.height = 300;
       t.getContext('2d').drawImage(c, 0, 0, 400, 300);
-      return { blob, thumb: t.toDataURL('image/jpeg', 0.7), caption, custom: '', slot };
+      return { blob, buf: await blob.arrayBuffer(), thumb: t.toDataURL('image/jpeg', 0.7), caption, custom: '', slot };
     } finally { URL.revokeObjectURL(url); }
   }
   function orderedPhotos() {
@@ -1369,8 +1383,9 @@
         client: $('client').value.trim(), project: $('project').value.trim(), docTitle: $('docTitle').value.trim(),
         line3: fmtDate(data.Date) + ' - ' + data.Site,
         narrative: data.ReportText, blocks: buildBlocks(data), data,
-        photos: orderedPhotos().map(p => ({ data: p.blob, caption: p.caption === 'Other' ? (p.custom || '') : p.caption }))
+        photos: orderedPhotos().map(p => ({ data: p.buf || p.blob, caption: p.caption === 'Other' ? (p.custom || '') : p.caption }))
       };
+      if (typeof JSZip === 'undefined') throw new Error('the Word file builder did not load. Check the phone has signal, then reload the page');
       const blob = await buildDocx(opts, TEMPLATE_B64);
       const filename = fileBase() + '.docx';
       lastBuilt = { docxBlob: blob, docxName: filename, jsonText: JSON.stringify(data, null, 2), jsonName: fileBase() + '.json' };
@@ -1384,7 +1399,7 @@
         writeLog(log); renderLog();
         toast('Report saved: ' + filename);
       }
-    } catch (e) { console.error(e); toast('Something went wrong building the report.'); }
+    } catch (e) { console.error(e); toast('Could not build the report: ' + ((e && e.message) || e) + '. If it mentions a photo, remove and re-add the photos.'); }
     finally { $('makeBtn').disabled = false; updateBar(); }
   });
 
