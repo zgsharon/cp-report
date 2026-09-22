@@ -187,7 +187,7 @@
     <div class="hint">Start of day is always there. Add midday or end of day when conditions change.</div>
     <div class="row">
       <div class="field"><label class="lbl" for="workHours">Hours on site</label><input type="text" id="workHours" placeholder="Example: 7:00 AM to 3:30 PM"></div>
-      <div class="field"><label class="lbl" for="weatherNote">Ground or site note</label><input type="text" id="weatherNote" placeholder="Example: wet ground, trench holding water"></div>
+      <div class="field"><label class="lbl" for="weatherNote">Ground or site note</label><textarea id="weatherNote" rows="1" class="grow" placeholder="Example: wet ground, trench holding water"></textarea></div>
     </div>
     <div class="slot" data-slot="weather" data-caption="Weather"></div>
   </section>
@@ -208,7 +208,7 @@
     </div>
     <div class="field" style="margin-top:10px">
       <label class="lbl" for="equipOther">Other equipment, meter IDs or serial numbers</label>
-      <input type="text" id="equipOther" placeholder="Example: Fluke 87V no. 2, Cu/CuSO4 cell no. 4">
+      <textarea id="equipOther" rows="1" class="grow" placeholder="Example: Fluke 87V no. 2, Cu/CuSO4 cell no. 4"></textarea>
     </div>
   </section>
 
@@ -233,7 +233,7 @@
       </div>
       <div class="field"><label class="lbl" for="pipeCoating">Coating</label>
         <select id="pipeCoating"><option>Polyethylene encasement</option><option>Fusion bonded epoxy</option><option>Tape wrap</option><option>Coal tar</option><option>Mortar</option><option>Bare</option><option>Other</option></select></div>
-      <div class="field"><label class="lbl" for="pipeNote">Pipe note (optional)</label><input type="text" id="pipeNote" placeholder="Example: joints bonded with #4 straps"></div>
+      <div class="field"><label class="lbl" for="pipeNote">Pipe note (optional)</label><textarea id="pipeNote" rows="1" class="grow" placeholder="Example: joints bonded with #4 straps"></textarea></div>
       <div class="slot" data-slot="pipe" data-caption="Pipe and coating"></div>
     </div>
   </section>
@@ -278,7 +278,7 @@
         <div class="field"><label class="lbl" for="leadIns">Insulation</label>
           <select id="leadIns"><option>HMWPE</option><option>THHN</option><option>THWN</option><option>Other</option></select></div>
       </div>
-      <div class="field"><label class="lbl" for="leadLength">Lead length <span class="unit">feet, each or total</span></label><input type="text" id="leadLength" placeholder="Example: 20 ft each"></div>
+      <div class="field"><label class="lbl" for="leadLength">Lead length <span class="unit">feet, each or total</span></label><textarea id="leadLength" rows="1" class="grow" placeholder="Example: 20 ft each"></textarea></div>
       <div class="slot" data-slot="lead" data-caption="Anode lead wire"></div>
     </div>
   </section>
@@ -304,7 +304,7 @@
         <div class="field"><label class="lbl" for="conduitType">Conduit</label>
           <select id="conduitType"><option>PVC Schedule 40</option><option>PVC Schedule 80</option><option>Rigid steel</option><option>Direct buried, no conduit</option></select></div>
       </div>
-      <div class="field"><label class="lbl" for="conduitSize">Conduit size <span class="unit">inches</span></label><input type="text" id="conduitSize" placeholder="Example: 1"></div>
+      <div class="field"><label class="lbl" for="conduitSize">Conduit size <span class="unit">inches</span></label><textarea id="conduitSize" rows="1" class="grow" placeholder="Example: 1"></textarea></div>
       <div class="slot" data-slot="header" data-caption="Header cable and conduit"></div>
     </div>
   </section>
@@ -319,7 +319,7 @@
       </div>
       <div class="row">
         <div class="field"><label class="lbl" for="tsCount">Test stations installed today</label><input type="number" id="tsCount" inputmode="numeric" min="0" placeholder="1"></div>
-        <div class="field"><label class="lbl" for="tsId">Test station name or station</label><input type="text" id="tsId" placeholder="Example: TS-3 at Sta 13+20"></div>
+        <div class="field"><label class="lbl" for="tsId">Test station name or station</label><textarea id="tsId" rows="1" class="grow" placeholder="Example: TS-3 at Sta 13+20"></textarea></div>
       </div>
       <div class="field"><span class="lbl">Terminal board wiring</span>
         <div class="tbl" data-table="terminals"></div>
@@ -342,7 +342,7 @@
       <div class="field"><span class="lbl">Cell checked against a second cell today</span>
         <div class="seg" data-seg="refCheck"><button type="button" data-val="yes" data-tone="good" aria-pressed="false">Yes, within 10 mV</button><button type="button" data-val="off" data-tone="warn" aria-pressed="false">Yes, more than 10 mV off</button><button type="button" data-val="no" aria-pressed="true">Not checked</button></div>
       </div>
-      <div class="field"><label class="lbl" for="refNote">Cell ID or note (optional)</label><input type="text" id="refNote" placeholder="Example: cell no. 4, fresh solution"></div>
+      <div class="field"><label class="lbl" for="refNote">Cell ID or note (optional)</label><textarea id="refNote" rows="1" class="grow" placeholder="Example: cell no. 4, fresh solution"></textarea></div>
     </div>
   </section>
 
@@ -677,7 +677,7 @@
   const TABLES = {
     weather: { cols: [
       { k: 'when', label: 'Time of day', type: 'select', opts: ['Start of day', 'Midday', 'End of day', 'Other'] },
-      { k: 'time', label: 'Time', type: 'text', ph: '7:00 AM' },
+      { k: 'time', label: 'Time', type: 'text', ph: '7:00 AM', wide: 0 },
       { k: 'cond', label: 'Conditions', type: 'select', wide: 1, opts: ['Clear', 'Partly cloudy', 'Overcast', 'Windy', 'Rain', 'Snow', 'Fog', 'Hot', 'Cold'] },
       { k: 'temp', label: 'Temp \u00b0F', type: 'num', ph: '55' }] },
     locations: { cols: [
@@ -748,6 +748,7 @@
   function num(v) { return v !== '' && v != null && !isNaN(Number(v)) ? String(Number(v)) : ''; }
   function plural(n, one, many) { return n === 1 ? one : (many || one + 's'); }
   function fmtV(v) { const n = Number(v); return isNaN(n) || v === '' ? '' : n.toFixed(3); }
+  function nowClock() { const d = new Date(); let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + ap; }
   function splitList(s) { return String(s || '').split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); }
 
   // ---------- repeating tables ----------
@@ -757,7 +758,7 @@
   }
   function blankRow(key) { const r = {}; TABLES[key].cols.forEach(c => { r[c.k] = c.type === 'select' ? c.opts[0] : ''; }); return r; }
   function addRow(key, vals) { const r = blankRow(key); if (vals) Object.assign(r, vals);
-    if (key === 'weather' && !vals) { const used = tables.weather.map(x => x.when); r.when = ['Start of day', 'Midday', 'End of day', 'Other'].find(w => !used.includes(w)) || 'Other'; }
+    if (key === 'weather' && !vals) { const used = tables.weather.map(x => x.when); r.when = ['Start of day', 'Midday', 'End of day', 'Other'].find(w => !used.includes(w)) || 'Other'; r.time = nowClock(); }
     tables[key].push(r); return r; }
   function renderTable(key) {
     const host = document.querySelector('[data-table="' + key + '"]'); if (!host) return;
@@ -782,6 +783,11 @@
         }); }
         cell.appendChild(inp); row.appendChild(cell);
       });
+      if (key === 'weather') {
+        const nb = document.createElement('button'); nb.type = 'button'; nb.className = 'gps'; nb.textContent = 'Now';
+        nb.addEventListener('click', () => { r.time = nowClock(); renderTable(key); onChange(); });
+        row.appendChild(nb);
+      }
       if (def.gps) {
         const g = document.createElement('button'); g.type = 'button'; g.className = 'gps'; g.textContent = 'GPS';
         g.addEventListener('click', () => {
