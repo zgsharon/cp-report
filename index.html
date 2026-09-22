@@ -170,13 +170,13 @@
       </div>
       <div class="field">
         <label class="lbl" for="site">Site or stretch of pipe <span class="req">*</span></label>
-        <input type="text" id="site" placeholder="Example: Plant influent line" autocomplete="off">
+        <input type="text" id="site" placeholder="Example: SVWRF, Bioreactor 5 area" autocomplete="off">
         <div class="hint">Goes in the file name, so keep it short.</div>
       </div>
     </div>
     <div class="field">
       <label class="lbl" for="workSummary">What was done today (one or two lines)</label>
-      <textarea id="workSummary" rows="2" class="grow" placeholder="Example: Kantex set 6 anodes and one test station between Sta 12+00 and 14+50."></textarea>
+      <textarea id="workSummary" rows="2" class="grow" placeholder="Example: Kantex installed 5 anodes and spliced them to the header cable at TS 22 on the 48&quot; ML."></textarea>
     </div>
   </section>
 
@@ -197,7 +197,7 @@
     <div id="companies"></div>
     <div class="field">
       <label class="lbl" for="dropIns">Stopped by to check in (name and company)</label>
-      <textarea id="dropIns" rows="1" class="grow" placeholder="Example: Plant operator from SVWRF, 10:30 AM"></textarea>
+      <textarea id="dropIns" rows="1" class="grow" placeholder="Example: Carollo inspector, 10:30 AM"></textarea>
     </div>
   </section>
 
@@ -233,7 +233,7 @@
       </div>
       <div class="field"><label class="lbl" for="pipeCoating">Coating</label>
         <select id="pipeCoating"><option>Polyethylene encasement</option><option>Fusion bonded epoxy</option><option>Tape wrap</option><option>Coal tar</option><option>Mortar</option><option>Bare</option><option>Other</option></select></div>
-      <div class="field"><label class="lbl" for="pipeNote">Pipe note (optional)</label><textarea id="pipeNote" rows="1" class="grow" placeholder="Example: joints bonded with #4 straps"></textarea></div>
+      <div class="field"><label class="lbl" for="pipeNote">Pipe note (optional)</label><textarea id="pipeNote" rows="1" class="grow" placeholder="Example: mortar-coated steel, test leads on the downstream side of the coupler"></textarea></div>
       <div class="slot" data-slot="pipe" data-caption="Pipe and coating"></div>
     </div>
   </section>
@@ -327,7 +327,7 @@
       </div>
       <div class="field"><span class="lbl">Wiring compared to the drawing</span>
         <div class="seg" data-seg="tsWiring"><button type="button" data-val="match" data-tone="good" aria-pressed="true">Matches the drawing</button><button type="button" data-val="differs" data-tone="warn" aria-pressed="false">Differs from the drawing</button></div>
-        <div class="sub-fields" id="tsWiringBox" hidden><label class="lbl" for="tsWiringNote">How it differs and what was said</label><textarea id="tsWiringNote" rows="2" class="grow" placeholder="Example: Anode header landed on terminal 3 instead of 2. Kantex was told to move it before backfill."></textarea></div>
+        <div class="sub-fields" id="tsWiringBox" hidden><label class="lbl" for="tsWiringNote">How it differs and what was said</label><textarea id="tsWiringNote" rows="2" class="grow" placeholder="Example: Anode header landed on terminal 3 instead of 2. Kantex was told to move it before the test station is closed up."></textarea></div>
       </div>
       <div class="slot" data-slot="ts" data-caption="Test station and terminal board"></div>
     </div>
@@ -389,7 +389,7 @@
       </div>
       <div class="field"><span class="lbl">Coating repair at each weld</span>
         <div class="seg" data-seg="weldRepair"><button type="button" data-val="all" data-tone="good" aria-pressed="true">All welds repaired</button><button type="button" data-val="some" data-tone="warn" aria-pressed="false">Some not repaired</button><button type="button" data-val="none" data-tone="warn" aria-pressed="false">Not repaired yet</button></div>
-        <div class="sub-fields" id="weldRepairBox" hidden><label class="lbl" for="weldNote">Which welds and what was said</label><textarea id="weldNote" rows="2" class="grow" placeholder="Example: Two welds at Sta 13+20 were left bare. Kantex was told to cap them before backfill."></textarea></div>
+        <div class="sub-fields" id="weldRepairBox" hidden><label class="lbl" for="weldNote">Which welds and what was said</label><textarea id="weldNote" rows="2" class="grow" placeholder="Example: Two test lead welds at TS 22 still need mortar. Kantex was told to finish them before backfill."></textarea></div>
       </div>
       <div class="slot" data-slot="welds" data-caption="Weld and coating repair"></div>
     </div>
@@ -433,7 +433,7 @@
         <div class="field"><label class="lbl" for="connMat">Material</label>
           <select id="connMat"><option>Two-part epoxy</option><option>Epoxy and mortar</option><option>Mortar</option><option>Wax tape</option><option>Cold applied tape</option><option>Heat shrink</option><option>Polyethylene encasement patch</option><option>Other</option></select></div>
       </div>
-      <div class="field"><label class="lbl" for="connNote">Note (optional)</label><textarea id="connNote" rows="1" class="grow" placeholder="Example: Encasement re-taped at each lead wire."></textarea></div>
+      <div class="field"><label class="lbl" for="connNote">Note (optional)</label><textarea id="connNote" rows="1" class="grow" placeholder="Example: Epoxy and mortar repaired at each test lead on the 48&quot; ML."></textarea></div>
       <div class="slot" data-slot="conn" data-caption="Coating repair at connection"></div>
     </div>
   </section>
@@ -441,7 +441,7 @@
   <section class="card">
     <h2>Anything else</h2>
     <div class="field">
-      <textarea id="notes" rows="2" class="grow" placeholder="Example: Kantex ran out of prepackaged anodes at noon. Four more holes are drilled and ready for tomorrow."></textarea>
+      <textarea id="notes" rows="2" class="grow" placeholder="Example: Kantex could not find the 30&quot; RAS where the drawings show it. Waiting on engineer approval to move TS 10."></textarea>
       <div class="row" style="margin-top:6px;align-items:center">
         <button class="btn small" id="tidyBtn2" type="button" hidden style="flex:0 0 auto">Tidy my notes</button>
         <div class="hint" style="margin-top:0;flex:1 1 200px">Short phrases are fine. This goes in the report as written. Tidy cleans up spelling and sentences in every typed box for you to approve.</div>
@@ -686,7 +686,7 @@
       { k: 'lat', label: 'Latitude', type: 'num', ph: '40.6041' },
       { k: 'lng', label: 'Longitude', type: 'num', ph: '-111.9218' }], gps: true },
     anodeHoles: { cols: [
-      { k: 'loc', label: 'Anode or station', type: 'text', wide: 1, ph: 'A-1 at 12+20' },
+      { k: 'loc', label: 'Anode or station', type: 'text', wide: 1, ph: 'TS 22 anode 3' },
       { k: 'depth', label: 'Depth ft', type: 'num', ph: '8' },
       { k: 'spacing', label: 'Spacing ft', type: 'num', ph: '20' }] },
     terminals: { cols: [
@@ -695,20 +695,20 @@
       { k: 'size', label: 'AWG', type: 'select', opts: AWG },
       { k: 'color', label: 'Color', type: 'text', ph: 'white' }] },
     native: { cols: [
-      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS-3 pipe lead' },
+      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS 22 pipe lead' },
       { k: 'v', label: 'Potential V', type: 'num', ph: '-0.612' }] },
     pots: { cols: [
-      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS-3 pipe lead' },
+      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS 22 pipe lead' },
       { k: 'afOn', label: 'As-found on V', type: 'num', ph: '-0.905' },
       { k: 'afOff', label: 'As-found off V', type: 'num', ph: '-0.870' },
       { k: 'alOn', label: 'As-left on V', type: 'num', ph: '-0.910' },
       { k: 'alOff', label: 'As-left off V', type: 'num', ph: '-0.872' }] },
     isolation: { cols: [
       { k: 'item', label: 'Item', type: 'select', opts: ['Flange', 'Joint', 'Casing', 'Other'] },
-      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'Valve vault at 13+40' },
+      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'Dresser coupler on 48" ML at TS 22' },
       { k: 'result', label: 'Result', type: 'select', opts: ['Isolated', 'Shorted', 'Not tested'] }] },
     excav: { cols: [
-      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'Sta 12+00 to 12+60' },
+      { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS 11 on the 30" RAS' },
       { k: 'depth', label: 'Depth ft', type: 'num', ph: '6.5' },
       { k: 'backfill', label: 'Backfill', type: 'select', opts: ['Approved loam', 'Structural sand', 'Native soil', 'Sand bedding', 'Road base', 'Flowable fill', 'Slurry', 'Other'] }] }
   };
