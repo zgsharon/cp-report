@@ -192,7 +192,8 @@
     <button class="btn small tbl-add" type="button" data-add="weather">+ Add a reading (midday, end of day)</button>
     <div class="hint">Start of day is always there. Add midday or end of day when conditions change.</div>
     <div class="row">
-      <div class="field"><label class="lbl" for="workHours">Hours on site</label><input type="text" id="workHours" placeholder="Example: 7:00 AM to 3:30 PM"></div>
+      <div class="field"><label class="lbl" for="workHours">Hours on site</label><input type="text" id="workHours" placeholder="Example: 7:00 AM to 3:30 PM">
+        <div style="display:flex;gap:8px;margin-top:6px"><button class="btn small" type="button" id="hrsStart">Start now</button><button class="btn small" type="button" id="hrsEnd">End now</button></div></div>
       <div class="field"><label class="lbl" for="weatherNote">Ground or site note</label><textarea id="weatherNote" rows="1" class="grow" placeholder="Example: wet ground, trench holding water"></textarea></div>
     </div>
     <div class="slot" data-slot="weather" data-caption="Weather"></div>
@@ -203,7 +204,8 @@
     <div id="companies"></div>
     <div class="row">
       <div class="field"><label class="lbl" for="crewCount">Kantex crew on site (head count)</label><input type="number" id="crewCount" inputmode="numeric" min="0" placeholder="3"></div>
-      <div class="field"><label class="lbl" for="crewHours">Crew hours on site</label><input type="text" id="crewHours" placeholder="Example: 7:00 AM to 3:30 PM"></div>
+      <div class="field"><label class="lbl" for="crewHours">Crew hours on site</label><input type="text" id="crewHours" placeholder="Example: 7:00 AM to 3:30 PM">
+        <div style="margin-top:6px"><button class="btn small" type="button" id="crewHoursSame">Same as my hours</button></div></div>
     </div>
     <div class="field">
       <label class="lbl" for="dropIns">Stopped by to check in (name and company)</label>
@@ -225,8 +227,9 @@
   <section class="card">
     <h2>Contractor equipment on site</h2>
     <div class="chips" id="cequipChips">
-      <button type="button">Excavator</button><button type="button">Mini excavator</button><button type="button">Backhoe</button><button type="button">Vac truck</button><button type="button">Boring rig</button><button type="button">Skid steer</button><button type="button">Trencher</button><button type="button">Dump truck</button><button type="button">Water truck</button><button type="button">Compactor</button><button type="button">Crane</button><button type="button">Cadweld kit</button><button type="button">Pickup only</button>
+      <button type="button">Excavator</button><button type="button">Mini excavator</button><button type="button">Backhoe</button><button type="button">Vac truck</button><button type="button">Hydrovac</button><button type="button">Air truck</button><button type="button">Boring rig</button><button type="button">Skid steer</button><button type="button">Trencher</button><button type="button">Dump truck</button><button type="button">Water truck</button><button type="button">Compactor</button><button type="button">Crane</button><button type="button">Cadweld kit</button><button type="button">Pickup only</button>
     </div>
+    <div style="margin-top:8px"><button class="btn small" type="button" id="cequipLast">Same as last report</button></div>
     <div class="field" style="margin-top:10px">
       <label class="lbl" for="cequipOther">Other equipment, or notes on idle equipment</label>
       <textarea id="cequipOther" rows="1" class="grow" placeholder="Example: second excavator sat idle all day waiting on anodes"></textarea>
@@ -249,6 +252,10 @@
   <section class="card" data-sec="pipe">
     <div class="sec-head"><h2>Pipe</h2></div>
     <div class="sec-body">
+      <div class="chips" id="pipeQuick" style="margin-bottom:10px">
+        <button type="button" data-size="54">54" PI</button><button type="button" data-size="48">48" ML</button><button type="button" data-size="42">42" PI</button><button type="button" data-size="30">30" RAS</button><button type="button" data-size="8">8" SCUM</button>
+      </div>
+      <div class="hint" style="margin-bottom:10px">Tap the pipe worked on today and the size fills in. Material and coating stay as you last set them.</div>
       <div class="row">
         <div class="field"><label class="lbl" for="pipeSize">Size <span class="unit">inches</span></label><input type="number" id="pipeSize" inputmode="decimal" step="any" placeholder="24"></div>
         <div class="field"><label class="lbl" for="pipeMaterial">Material</label>
@@ -779,6 +786,30 @@
   function tableInit() {
     Object.keys(TABLES).forEach(k => { tables[k] = tables[k] || []; });
     document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => { addRow(b.dataset.add); renderTable(b.dataset.add); const last = document.querySelector('[data-table="' + b.dataset.add + '"] .trow:last-child input, [data-table="' + b.dataset.add + '"] .trow:last-child select'); if (last) last.focus(); onChange(); }));
+  }
+  function tableExtras() {
+    document.querySelectorAll('[data-add]').forEach(b => {
+      const k = b.dataset.add; if (k === 'weather' || k === 'locations') return;
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'btn small tbl-add'; c.style.marginLeft = '8px'; c.textContent = 'Copy last row';
+      c.title = 'Adds a row with the same answers as the row above. A number at the end of a name goes up by one.';
+      c.addEventListener('click', () => {
+        const rows = tables[k];
+        if (!rows.length) addRow(k);
+        else {
+          const vals = Object.assign({}, rows[rows.length - 1]);
+          TABLES[k].cols.forEach(col => { if (col.type === 'text') { const m = String(vals[col.k] || '').match(/^(.*?)(\d+)\s*$/); if (m) vals[col.k] = m[1] + (Number(m[2]) + 1); } });
+          addRow(k, vals);
+        }
+        renderTable(k); onChange();
+      });
+      b.after(c);
+    });
+  }
+  function hoursNow(id, which) {
+    const el = $(id); const v = el.value.trim(); const now = nowClock();
+    if (which === 'start') { const m = v.match(/\bto\b\s*(.*)$/); el.value = now + ' to ' + (m ? m[1].trim() : ''); }
+    else { const m = v.match(/^(.*?)\s*\bto\b/); el.value = (m ? m[1].trim() : v) + ' to ' + now; }
+    el.value = el.value.trim(); onChange();
   }
   function blankRow(key) { const r = {}; TABLES[key].cols.forEach(c => { r[c.k] = c.type === 'select' ? c.opts[0] : ''; }); return r; }
   function addRow(key, vals) { const r = blankRow(key); if (vals) Object.assign(r, vals);
@@ -1454,7 +1485,25 @@
   // ---------- boot ----------
   function todayIso() { const t = new Date(); const pad = n => String(n).padStart(2, '0'); return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate()); }
   function start() {
-    segInit(); slotInit(); tableInit(); loadSettings();
+    segInit(); slotInit(); tableInit(); tableExtras(); loadSettings();
+    $('hrsStart').addEventListener('click', () => hoursNow('workHours', 'start'));
+    $('hrsEnd').addEventListener('click', () => hoursNow('workHours', 'end'));
+    $('crewHoursSame').addEventListener('click', () => { $('crewHours').value = $('workHours').value; onChange(); if (!$('workHours').value.trim()) toast('Fill in your hours on site first (under Weather).'); });
+    $('cequipLast').addEventListener('click', () => {
+      const log = readLog(); const last = log.length ? log[log.length - 1] : null;
+      if (!last || !last.snapshot) { toast('No report has been made on this phone yet.'); return; }
+      const sn = last.snapshot; setCequip(sn.cequip || []);
+      $('cequipOther').value = (sn.text && sn.text.cequipOther) || '';
+      if (sn.text && sn.text.crewCount) $('crewCount').value = sn.text.crewCount;
+      onChange(); toast('Equipment and crew count copied from ' + fmtDate(last.date) + '. Change anything that is different today.');
+    });
+    document.querySelectorAll('#pipeQuick button').forEach(b => { b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => {
+      $('pipeSize').value = b.dataset.size;
+      document.querySelectorAll('#pipeQuick button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      const loc = tables.locations || []; if (loc.length && !loc[0].pipe) { loc[0].pipe = b.textContent; renderTable('locations'); }
+      onChange();
+    }); });
+    $('pipeSize').addEventListener('input', () => { document.querySelectorAll('#pipeQuick button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.size === $('pipeSize').value))); });
     $('date').value = todayIso();
     let hadDraft = false;
     try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d) { restore(d, true); hadDraft = true; } } catch (e) {}
