@@ -201,6 +201,10 @@
   <section class="card">
     <h2>People on site</h2>
     <div id="companies"></div>
+    <div class="row">
+      <div class="field"><label class="lbl" for="crewCount">Kantex crew on site (head count)</label><input type="number" id="crewCount" inputmode="numeric" min="0" placeholder="3"></div>
+      <div class="field"><label class="lbl" for="crewHours">Crew hours on site</label><input type="text" id="crewHours" placeholder="Example: 7:00 AM to 3:30 PM"></div>
+    </div>
     <div class="field">
       <label class="lbl" for="dropIns">Stopped by to check in (name and company)</label>
       <textarea id="dropIns" rows="1" class="grow" placeholder="Example: Carollo inspector, 10:30 AM"></textarea>
@@ -216,6 +220,19 @@
       <label class="lbl" for="equipOther">Other equipment, meter IDs or serial numbers</label>
       <textarea id="equipOther" rows="1" class="grow" placeholder="Example: Fluke 87V no. 2, Cu/CuSO4 cell no. 4"></textarea>
     </div>
+  </section>
+
+  <section class="card">
+    <h2>Contractor equipment on site</h2>
+    <div class="chips" id="cequipChips">
+      <button type="button">Excavator</button><button type="button">Mini excavator</button><button type="button">Backhoe</button><button type="button">Vac truck</button><button type="button">Boring rig</button><button type="button">Skid steer</button><button type="button">Trencher</button><button type="button">Dump truck</button><button type="button">Water truck</button><button type="button">Compactor</button><button type="button">Crane</button><button type="button">Cadweld kit</button><button type="button">Pickup only</button>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label class="lbl" for="cequipOther">Other equipment, or notes on idle equipment</label>
+      <textarea id="cequipOther" rows="1" class="grow" placeholder="Example: second excavator sat idle all day waiting on anodes"></textarea>
+    </div>
+    <div class="hint">For change orders and schedule questions later. Tap what was on site today, whether or not it was used.</div>
+    <div class="slot" data-slot="cequip" data-caption="Contractor equipment"></div>
   </section>
 
   <!-- Sections from the setup brief -->
@@ -675,8 +692,8 @@
 <script>
 (function () {
   const $ = id => document.getElementById(id);
-  const CAPTIONS = ['Site overview', 'Weather', 'Pipe and coating', 'Anode installation', 'Anode hole depth', 'Anode lead wire', 'Header cable and conduit', 'Splice', 'Test station and terminal board', 'Native potential reading', 'Potential reading after connection', 'Weld and coating repair', 'Isolation check', 'Excavation and backfill', 'Coating repair at connection', 'Deficiency', 'Other'];
-  const SLOT_ORDER = ['weather', 'loc', 'pipe', 'anodes', 'lead', 'header', 'ts', 'native', 'pots', 'welds', 'iso', 'excav', 'conn', 'other'];
+  const CAPTIONS = ['Site overview', 'Weather', 'Contractor equipment', 'Pipe and coating', 'Anode installation', 'Anode hole depth', 'Anode lead wire', 'Header cable and conduit', 'Splice', 'Test station and terminal board', 'Native potential reading', 'Potential reading after connection', 'Weld and coating repair', 'Isolation check', 'Excavation and backfill', 'Coating repair at connection', 'Deficiency', 'Other'];
+  const SLOT_ORDER = ['weather', 'cequip', 'loc', 'pipe', 'anodes', 'lead', 'header', 'ts', 'native', 'pots', 'welds', 'iso', 'excav', 'conn', 'other'];
   const COMPANIES = ['SVWRF', 'Carollo', 'Kantex', 'ICG'];
   const DRAFT_KEY = 'cpReportDraft', LOG_KEY = 'cpReportLog', SETTINGS_KEY = 'cpReportSettings';
   const AWG = ['#14', '#12', '#10', '#8', '#6', '#4', '#2'];
@@ -843,6 +860,8 @@
     });
   }
   function peopleFor(co) { return people[co].slice().concat(splitList(people[co + '_other'])); }
+  function cequipList() { const l = Array.from(document.querySelectorAll('#cequipChips button[aria-pressed="true"]')).map(b => b.textContent); return l.concat(splitList($('cequipOther').value)); }
+  function setCequip(list) { document.querySelectorAll('#cequipChips button').forEach(b => b.setAttribute('aria-pressed', String((list || []).includes(b.textContent)))); }
   function equipList() { const l = Array.from(document.querySelectorAll('#equipChips button[aria-pressed="true"]')).map(b => b.textContent); return l.concat(splitList($('equipOther').value)); }
   function setEquip(list) { document.querySelectorAll('#equipChips button').forEach(b => b.setAttribute('aria-pressed', String((list || []).includes(b.textContent)))); }
 
@@ -864,6 +883,9 @@
     const parts = [];
     COMPANIES.forEach(co => { const p = peopleFor(co); if (p.length) parts.push(joinNames(p) + ' (' + co + ')'); });
     if (parts.length) out.push('On site: ' + parts.join('; ').replace(/; /g, ', ') + '.');
+    const cc = num($('crewCount').value), ch = $('crewHours').value.trim();
+    if (cc || ch) out.push(inst + ' had ' + (cc ? cc + ' ' + plural(Number(cc), 'person', 'people') : 'a crew') + ' on site' + (ch ? ', ' + ch : '') + '.');
+    const ce = cequipList(); if (ce.length) out.push(inst + ' equipment on site: ' + joinNames(ce) + '.');
     const di = $('dropIns').value.trim(); if (di) out.push('Stopped by to check in: ' + di.replace(/[.]$/, '') + '.');
     const eq = equipList(); if (eq.length) out.push('Inspection equipment used: ' + joinNames(eq) + '.');
 
@@ -1119,10 +1141,10 @@
     t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3500);
   }
 
-  const TEXT_IDS = ['date', 'site', 'workSummary', 'workHours', 'weatherNote', 'dropIns', 'equipOther', 'pipeSize', 'pipeMaterial', 'pipeCoating', 'pipeNote', 'anodeWeightOther', 'anodeCount', 'anodeBackfill', 'leadSize', 'leadIns', 'leadLength', 'headerSize', 'headerIns', 'headerLength', 'splices', 'spliceType', 'conduitType', 'conduitSize', 'tsCount', 'tsId', 'tsWiringNote', 'refNote', 'currentA', 'resistOhm', 'weldCount', 'weldMat', 'weldNote', 'connCount', 'connMat', 'connNote', 'notes', 'signoffNote'];
+  const TEXT_IDS = ['date', 'site', 'workSummary', 'workHours', 'weatherNote', 'crewCount', 'crewHours', 'cequipOther', 'dropIns', 'equipOther', 'pipeSize', 'pipeMaterial', 'pipeCoating', 'pipeNote', 'anodeWeightOther', 'anodeCount', 'anodeBackfill', 'leadSize', 'leadIns', 'leadLength', 'headerSize', 'headerIns', 'headerLength', 'splices', 'spliceType', 'conduitType', 'conduitSize', 'tsCount', 'tsId', 'tsWiringNote', 'refNote', 'currentA', 'resistOhm', 'weldCount', 'weldMat', 'weldNote', 'connCount', 'connMat', 'connNote', 'notes', 'signoffNote'];
   const SETTING_IDS = ['client', 'project', 'installer', 'docTitle', 'inspector', 'namesSVWRF', 'namesCarollo', 'namesKantex', 'namesICG'];
   function snapshot() {
-    const s = { seg: Object.assign({}, seg), text: {}, tables: JSON.parse(JSON.stringify(tables)), people: JSON.parse(JSON.stringify(people)), equip: Array.from(document.querySelectorAll('#equipChips button[aria-pressed="true"]')).map(b => b.textContent), narrEdited, narr: narrEdited ? $('narrEdit').value : '' };
+    const s = { seg: Object.assign({}, seg), text: {}, tables: JSON.parse(JSON.stringify(tables)), people: JSON.parse(JSON.stringify(people)), equip: Array.from(document.querySelectorAll('#equipChips button[aria-pressed="true"]')).map(b => b.textContent), cequip: Array.from(document.querySelectorAll('#cequipChips button[aria-pressed="true"]')).map(b => b.textContent), narrEdited, narr: narrEdited ? $('narrEdit').value : '' };
     TEXT_IDS.forEach(id => s.text[id] = $(id).value);
     return s;
   }
@@ -1132,7 +1154,7 @@
     TEXT_IDS.forEach(id => { if (s.text && id in s.text) { if (!keepDate && id === 'date') return; $(id).value = s.text[id]; } });
     if (s.tables) Object.keys(TABLES).forEach(k => { tables[k] = Array.isArray(s.tables[k]) ? s.tables[k].map(r => Object.assign(blankRow(k), r)) : []; });
     if (s.people) { Object.keys(people).forEach(k => delete people[k]); Object.assign(people, s.people); }
-    setEquip(s.equip || []);
+    setEquip(s.equip || []); setCequip(s.cequip || []);
     narrEdited = !!s.narrEdited;
     if (narrEdited) $('narrEdit').value = s.narr || '';
     if (!tables.weather.length) addRow('weather');
@@ -1292,6 +1314,7 @@
       SiteNote: $('weatherNote').value.trim(), HoursOnSite: $('workHours').value.trim(),
       PeopleSVWRF: peopleFor('SVWRF').join(', '), PeopleCarollo: peopleFor('Carollo').join(', '), PeopleKantex: peopleFor('Kantex').join(', '), PeopleICG: peopleFor('ICG').join(', '), DropIns: $('dropIns').value.trim(),
       Equipment: equipList().join(', '),
+      KantexCrewCount: num($('crewCount').value), KantexCrewHours: $('crewHours').value.trim(), ContractorEquipment: cequipList().join(', '),
       PipeSize: num($('pipeSize').value), PipeMaterial: $('pipeMaterial').value, PipeCoating: $('pipeCoating').value, PipeNote: $('pipeNote').value.trim(),
       AnodesToday: on('anodes') ? 'Yes' : 'No', AnodeType: on('anodes') ? seg.anodeType : '', AnodeWeight: on('anodes') ? anodeWeightText() : '', AnodeCount: on('anodes') ? num($('anodeCount').value) : '',
       AnodeBackfill: on('anodes') ? $('anodeBackfill').value : '', AnodeInstall: on('anodes') ? seg.anodeInstall : '',
@@ -1327,6 +1350,8 @@
     const wx = tables.weather || [];
     if (wx.length) B.push({ kind: 'list', title: 'Weather', headers: ['Time of day', 'Time', 'Conditions', 'Temp (\u00b0F)'], widths: [3000, 2500, 5950, 2500], rows: wx.map(r => [r.when, r.time, r.cond, num(r.temp)]) });
     const pp = [['SVWRF', d.PeopleSVWRF], ['Carollo', d.PeopleCarollo], ['Kantex', d.PeopleKantex], ['ICG', d.PeopleICG]];
+    if (d.KantexCrewCount || d.KantexCrewHours) pp.push(['Kantex crew size', d.KantexCrewCount], ['Kantex crew hours', d.KantexCrewHours]);
+    pp.push(['Kantex equipment', d.ContractorEquipment]);
     if (d.DropIns) pp.push(['Stopped by', d.DropIns]);
     B.push({ kind: 'kv', title: 'People on site', pairs: pp });
     const locs = rowsFilled('locations');
@@ -1411,7 +1436,8 @@
     $('date').value = todayIso();
     tables.weather = []; addRow('weather');
     ['anodeHoles', 'native', 'pots', 'isolation', 'excav'].forEach(k => { tables[k] = []; addRow(k); });
-    ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote', 'connNote', 'anodeCount', 'tsCount', 'tsId', 'currentA', 'resistOhm', 'weldCount', 'connCount', 'splices', 'headerLength', 'workHours', 'weatherNote'].forEach(k => { $(k).value = ''; });
+    ['workSummary', 'dropIns', 'notes', 'signoffNote', 'tsWiringNote', 'weldNote', 'connNote', 'anodeCount', 'tsCount', 'tsId', 'currentA', 'resistOhm', 'weldCount', 'connCount', 'splices', 'headerLength', 'workHours', 'weatherNote', 'crewCount', 'crewHours', 'cequipOther'].forEach(k => { $(k).value = ''; });
+    setCequip([]);
     ['weldRepair', 'connRepair'].forEach(k => setSeg(k, 'all')); setSeg('tsWiring', 'match'); setSeg('backfilled', 'no'); setSeg('signoff', 'per'); setSeg('sec_pots', 'no'); setSeg('sec_iso', 'no');
     narrEdited = false; syncNarrUI(); renderAllTables();
     $('newDayCard').hidden = true;
@@ -1439,6 +1465,7 @@
     if (!$('date').value) $('date').value = todayIso();
     TEXT_IDS.forEach(id => { $(id).addEventListener('input', onChange); $(id).addEventListener('change', onChange); });
     document.querySelectorAll('textarea').forEach(t => t.addEventListener('input', () => grow(t)));
+    document.querySelectorAll('#cequipChips button').forEach(b => { if (!b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); onChange(); }); });
     document.querySelectorAll('#equipChips button').forEach(b => { if (!b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', 'false'); b.addEventListener('click', () => { b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); onChange(); }); });
     SETTING_IDS.forEach(id => $(id).addEventListener('input', () => { saveSettings(); if (id.indexOf('names') === 0) renderCompanies(); onChange(); }));
     renderLog(); renderPhotos(); syncNarrUI(); onChange(); growAll(); setTimeout(growAll, 300);
