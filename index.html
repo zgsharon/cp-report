@@ -383,6 +383,7 @@
     <div class="sec-body">
       <div class="tbl" data-table="native"></div>
       <button class="btn small tbl-add" type="button" data-add="native">+ Add a reading</button>
+      <div class="hint">Type the number without the minus sign. The phone keypad has no minus key, so it is added for you when you leave the box. Potentials are to a CSE.</div>
       <div class="hint">Volts to the reference cell. Type the minus sign, for example -0.612. Anode open circuit readings can go here too.</div>
       <div class="slot" data-slot="native" data-caption="Native potential reading"></div>
     </div>
@@ -395,6 +396,7 @@
     <div class="sec-body">
       <div class="tbl" data-table="pots"></div>
       <button class="btn small tbl-add" type="button" data-add="pots">+ Add a reading</button>
+      <div class="hint">Type potentials without the minus sign, it is added for you when you leave the box.</div>
       <div class="hint">As-found is the first reading with the anodes connected. As-left is the reading when you walked away. On is with anodes connected, off is with them disconnected.</div>
       <div class="row" style="margin-top:12px">
         <div class="field"><label class="lbl" for="currentA">Anode current output <span class="unit">amps</span></label><input type="number" id="currentA" inputmode="decimal" step="any" placeholder="0.045"></div>
@@ -726,13 +728,13 @@
       { k: 'color', label: 'Color', type: 'text', ph: 'white' }] },
     native: { cols: [
       { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS 22 pipe lead' },
-      { k: 'v', label: 'Potential V', type: 'num', ph: '-0.612' }] },
+      { k: 'v', label: 'Potential V', type: 'num', ph: '0.612', neg: 1 }] },
     pots: { cols: [
       { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'TS 22 pipe lead' },
-      { k: 'afOn', label: 'As-found on V', type: 'num', ph: '-0.905' },
-      { k: 'afOff', label: 'As-found off V', type: 'num', ph: '-0.870' },
-      { k: 'alOn', label: 'As-left on V', type: 'num', ph: '-0.910' },
-      { k: 'alOff', label: 'As-left off V', type: 'num', ph: '-0.872' }] },
+      { k: 'afOn', label: 'As-found on V', type: 'num', ph: '0.905', neg: 1 },
+      { k: 'afOff', label: 'As-found off V', type: 'num', ph: '0.870', neg: 1 },
+      { k: 'alOn', label: 'As-left on V', type: 'num', ph: '0.910', neg: 1 },
+      { k: 'alOff', label: 'As-left off V', type: 'num', ph: '0.872', neg: 1 }] },
     isolation: { cols: [
       { k: 'item', label: 'Item', type: 'select', opts: ['Flange', 'Joint', 'Casing', 'Other'] },
       { k: 'loc', label: 'Location', type: 'text', wide: 1, ph: 'Dresser coupler on 48" ML at TS 22' },
@@ -831,6 +833,9 @@
         inp.setAttribute('aria-label', c.label + ' row ' + (idx + 1));
         inp.addEventListener('input', () => { r[c.k] = inp.value; onChange(); });
         inp.addEventListener('change', () => { r[c.k] = inp.value; onChange(); });
+        if (c.neg) { inp.setAttribute('aria-label', c.label + ' row ' + (idx + 1) + ', minus sign added for you');
+          const fix = () => { const n = Number(inp.value); if (inp.value !== '' && !isNaN(n) && n > 0) { inp.value = String(-n); r[c.k] = inp.value; onChange(); } };
+          inp.addEventListener('change', fix); inp.addEventListener('blur', fix); }
         if (c.k === 'lat') { inp.type = 'text'; inp.inputMode = 'text'; inp.addEventListener('paste', e => {
           const t = (e.clipboardData || window.clipboardData).getData('text') || '';
           const m = t.match(/(-?\d{1,3}\.\d+)[,\s]+(-?\d{1,3}\.\d+)/);
